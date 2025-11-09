@@ -154,16 +154,11 @@ void DrawMainScreen(int& screen)
 
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 0));
-    ImGui::Text("Stuff!");
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 10));
+    ImGui::Text("Store Items");
 
-    ImVec2 buttonSize(300, 120);
 
-    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.5f;
-    float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
-    ImGui::SetCursorPos(ImVec2(centerX, centerY));
-    if (ImGui::Button("Go To Second Screen", buttonSize))
-        screen = 1;
+
     static vector<string> items;
     if (items.empty()) {
         for (int i = 0; i < 20; ++i) {
@@ -171,10 +166,10 @@ void DrawMainScreen(int& screen)
         }
     }
 
-    ImGui::SetCursorPos(ImVec2(150, 50));
+    ImGui::SetCursorPos(ImVec2(150, 30));
 
     static int selected = -1;
-    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 200), true);
+    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 30 + 100), true);
     for (int i = 0; i < items.size(); i++) {
         // c_str() gives pointer to chars inside string, ImGui needs it like this to work
         if (ImGui::Selectable(items[i].c_str(), selected == i)) {
@@ -186,7 +181,30 @@ void DrawMainScreen(int& screen)
         cout << "Selected: " << items[selected] << endl;
         selected = -1;
     }
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 250));
+    ImGui::Text("Your cart");
+    ImGui::SetCursorPos(ImVec2(150, 270));
 
+    static int selected2 = -1;
+    ImGui::BeginChild("Scroll2", ImVec2(io.DisplaySize.x - 300, 270 + 100), true);
+    for (int i = 0; i < items.size(); i++) {
+        // c_str() gives pointer to chars inside string, ImGui needs it like this to work
+        if (ImGui::Selectable(items[i].c_str(), selected2 == i)) {
+            selected2 = i;
+        }
+    }
+    ImGui::EndChild();
+    if (selected2 >= 0) {
+        cout << "Selected2: " << items[selected2] << endl;
+        selected2 = -1;
+    }
+    ImVec2 buttonSize(300, 120);
+
+    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.5f;
+    float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
+    ImGui::SetCursorPos(ImVec2(centerX, 400));
+    if (ImGui::Button("Go To Second Screen", buttonSize))
+        screen = 1;
 
 }
 
