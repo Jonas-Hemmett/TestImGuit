@@ -151,28 +151,43 @@ int main()
 // MAIN SCREEN
 void DrawMainScreen(int& screen)
 {
+
     ImGuiIO& io = ImGui::GetIO();
+
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 0));
+    ImGui::Text("Stuff!");
+
     ImVec2 buttonSize(300, 120);
 
     float centerX = (io.DisplaySize.x - buttonSize.x) * 0.5f;
     float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
+    ImGui::SetCursorPos(ImVec2(centerX, centerY));
+    if (ImGui::Button("Go To Second Screen", buttonSize))
+        screen = 1;
+    static vector<string> items;
+    if (items.empty()) {
+        for (int i = 0; i < 20; ++i) {
+            items.push_back(to_string(i));
+        }
+    }
 
-    static const vector<char*> items = { "A", "B" };
-    ImGui::SetCursorPos(ImVec2(0, 0));
+    ImGui::SetCursorPos(ImVec2(150, 50));
 
     static int selected = -1;
-    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x, 200), true);
+    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 200), true);
     for (int i = 0; i < items.size(); i++) {
-        if (ImGui::Selectable(items[i]), selected == i) {
+        // c_str() gives pointer to chars inside string, ImGui needs it like this to work
+        if (ImGui::Selectable(items[i].c_str(), selected == i)) {
             selected = i;
         }
     }
     ImGui::EndChild();
-    if (selected >= 0) cout << "Selected: " << items[selected] << endl;
-    ImGui::SetCursorPos(ImVec2(centerX, centerY));
+    if (selected >= 0) {
+        cout << "Selected: " << items[selected] << endl;
+        selected = -1;
+    }
 
-    if (ImGui::Button("Go To Second Screen", buttonSize))
-        screen = 1;
+
 }
 
 
