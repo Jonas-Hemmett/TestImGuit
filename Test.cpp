@@ -56,7 +56,7 @@ int main()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(nullptr);
 
@@ -153,9 +153,19 @@ void DrawMainScreen(int& screen)
 {
 
     ImGuiIO& io = ImGui::GetIO();
-
     ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 10));
-    ImGui::Text("Store Items");
+
+    // ImGui stores text as character pointers
+    ImGui::SetWindowFontScale(2.0f);
+    const char* text0 = "Menu";
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text0).x) * 0.5f, 10));
+    ImGui::Text("%s", text0);
+    ImGui::SetWindowFontScale(1.0f);
+
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 50));
+    const char* text2 = "Products Available";
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text2).x) * 0.5f, 50));
+    ImGui::Text("%s", text2);
 
 
 
@@ -166,10 +176,26 @@ void DrawMainScreen(int& screen)
         }
     }
 
-    ImGui::SetCursorPos(ImVec2(150, 30));
+    ImGui::SetCursorPos(ImVec2(150, 70));
 
     static int selected = -1;
-    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 30 + 100), true);
+    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 200), true);
+    for (int i = 0; i < items.size(); i++) {
+        // c_str() gives pointer to chars inside string, ImGui needs it like this to work
+        if (ImGui::Selectable(items[i].c_str(), selected == i)) {
+            selected = i;
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 280));
+    const char* text1 = "You Cart";
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text1).x) * 0.5f, 280));
+    ImGui::Text("%s", text1);
+
+    ImGui::SetCursorPos(ImVec2(150, 300));
+
+    ImGui::BeginChild("Scroll2", ImVec2(io.DisplaySize.x - 300, 100), true);
     for (int i = 0; i < items.size(); i++) {
         // c_str() gives pointer to chars inside string, ImGui needs it like this to work
         if (ImGui::Selectable(items[i].c_str(), selected == i)) {
@@ -181,30 +207,14 @@ void DrawMainScreen(int& screen)
         cout << "Selected: " << items[selected] << endl;
         selected = -1;
     }
-    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 250));
-    ImGui::Text("Your cart");
-    ImGui::SetCursorPos(ImVec2(150, 270));
 
-    static int selected2 = -1;
-    ImGui::BeginChild("Scroll2", ImVec2(io.DisplaySize.x - 300, 270 + 100), true);
-    for (int i = 0; i < items.size(); i++) {
-        // c_str() gives pointer to chars inside string, ImGui needs it like this to work
-        if (ImGui::Selectable(items[i].c_str(), selected2 == i)) {
-            selected2 = i;
-        }
-    }
-    ImGui::EndChild();
-    if (selected2 >= 0) {
-        cout << "Selected2: " << items[selected2] << endl;
-        selected2 = -1;
-    }
-    ImVec2 buttonSize(300, 120);
-
-    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.5f;
+    ImVec2 buttonSize(240, 60);
+    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.25f + 10;
     float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
-    ImGui::SetCursorPos(ImVec2(centerX, 400));
-    if (ImGui::Button("Go To Second Screen", buttonSize))
+    ImGui::SetCursorPos(ImVec2(centerX, 420));
+    if (ImGui::Button("Go To Second Screen", buttonSize)) {
         screen = 1;
+    }
 
 }
 
