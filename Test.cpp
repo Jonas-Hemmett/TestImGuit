@@ -151,6 +151,16 @@ int main()
 // MAIN SCREEN
 void DrawMainScreen(int& screen)
 {
+    static char buffer[128] = ""; // empty C-string initially
+    ImGui::SetNextItemWidth(240);
+    ImGui::SetCursorPos(ImVec2(150, 410));
+    ImGui::InputText("Search", buffer, IM_ARRAYSIZE(buffer));
+    int typeSelect;
+    try {
+        typeSelect = stoi(buffer);
+    } catch (...) {
+        typeSelect = -1;
+    }
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 10));
@@ -168,11 +178,16 @@ void DrawMainScreen(int& screen)
     ImGui::Text("%s", text2);
 
 
-
+    cout << typeSelect << endl;
     static vector<string> items;
-    if (items.empty()) {
-        for (int i = 0; i < 20; ++i) {
+    items.clear();
+    for (int i = 0; i < 20; ++i) {
+        if (typeSelect == -1) {
             items.push_back(to_string(i));
+        } else {
+            if (to_string(i).find(to_string(typeSelect)) != std::string::npos) {
+                items.push_back(to_string(i));
+            }
         }
     }
 
@@ -203,18 +218,34 @@ void DrawMainScreen(int& screen)
         }
     }
     ImGui::EndChild();
-    if (selected >= 0) {
-        cout << "Selected: " << items[selected] << endl;
-        selected = -1;
-    }
+
+
+
+    ImGui::SetCursorPos(ImVec2(150, 463.75));
+
+    string s = "Item Selected: " + ((selected != -1) ? std::to_string(selected) : "none");
+    ImGui::Text("%s", s.c_str());
 
     ImVec2 buttonSize(240, 60);
-    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.25f + 10;
-    float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
-    ImGui::SetCursorPos(ImVec2(centerX, 420));
-    if (ImGui::Button("Go To Second Screen", buttonSize)) {
+
+    if (selected != -1) {
+        ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 440));
+        if (ImGui::Button("Go To ", buttonSize)) {
+            screen = 1;
+        }
+    }
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 1 * 0.25f + 10, 510));
+    if (ImGui::Button("Save Transaction", buttonSize)) {
         screen = 1;
     }
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 510));
+    if (ImGui::Button("Cancel Transaction ", buttonSize)) {
+        screen = 1;
+    }
+
+
 
 }
 
