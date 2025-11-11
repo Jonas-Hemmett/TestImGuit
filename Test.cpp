@@ -9,11 +9,18 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 using namespace std;
+
+struct SPass2 {
+    int itemId = -1;
+    int currentScreen = 0;
+
+};
 // ------------------------------------------------------------
 // Screen declarations
 // ------------------------------------------------------------
-void DrawMainScreen(int& screen);
-void DrawSecondScreen(int& screen);
+
+void DrawCartMenu(SPass2& sPass2);
+void DrawSecondScreen(SPass2& sPass2);
 
 
 // ------------------------------------------------------------
@@ -68,13 +75,14 @@ int main()
         SCREEN_MAIN = 0,
         SCREEN_SECOND = 1
     };
-
-    int currentScreen = SCREEN_MAIN;
+    SPass2 sPass2;
+    sPass2.currentScreen = SCREEN_MAIN;
 
 
     // --------------------------------------------------------
     // Main loop
     // --------------------------------------------------------
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -95,7 +103,7 @@ int main()
               ImGuiWindowFlags_NoDecoration
             | ImGuiWindowFlags_NoMove
             | ImGuiWindowFlags_NoResize
-            | ImGuiWindowFlags_NoSavedSettings
+                 | ImGuiWindowFlags_NoSavedSettings
             | ImGuiWindowFlags_NoBringToFrontOnFocus
             | ImGuiWindowFlags_NoNavFocus;
 
@@ -105,14 +113,14 @@ int main()
         // --------------------------------------------------------
         // Call the current screen function
         // --------------------------------------------------------
-        switch (currentScreen)
+        switch (sPass2.currentScreen)
         {
             case SCREEN_MAIN:
-                DrawMainScreen(currentScreen);
+                DrawCartMenu(sPass2);
                 break;
 
             case SCREEN_SECOND:
-                DrawSecondScreen(currentScreen);
+                DrawSecondScreen(sPass2);
                 break;
         }
 
@@ -148,8 +156,9 @@ int main()
 // SCREEN IMPLEMENTATIONS
 // ------------------------------------------------------------
 
+// TODO: Stop reloading the entire vector every time, update it only when searched.
 // MAIN SCREEN
-void DrawMainScreen(int& screen)
+void DrawCartMenu(SPass2& sPass2)
 {
     static char buffer[128] = ""; // empty C-string initially
     ImGui::SetNextItemWidth(240);
@@ -167,18 +176,17 @@ void DrawMainScreen(int& screen)
 
     // ImGui stores text as character pointers
     ImGui::SetWindowFontScale(2.0f);
-    const char* text0 = "Menu";
+    const char* text0 = "Items";
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text0).x) * 0.5f, 10));
     ImGui::Text("%s", text0);
     ImGui::SetWindowFontScale(1.0f);
 
     ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 50));
-    const char* text2 = "Products Available";
+    const char* text2 = "Items Available";
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text2).x) * 0.5f, 50));
     ImGui::Text("%s", text2);
 
 
-    cout << typeSelect << endl;
     static vector<string> items;
     items.clear();
     for (int i = 0; i < 20; ++i) {
@@ -194,7 +202,7 @@ void DrawMainScreen(int& screen)
     ImGui::SetCursorPos(ImVec2(150, 70));
 
     static int selected = -1;
-    ImGui::BeginChild("Scroll", ImVec2(io.DisplaySize.x - 300, 200), true);
+    ImGui::BeginChild("storeCart", ImVec2(io.DisplaySize.x - 300, 200), true);
     for (int i = 0; i < items.size(); i++) {
         // c_str() gives pointer to chars inside string, ImGui needs it like this to work
         if (ImGui::Selectable(items[i].c_str(), selected == i)) {
@@ -204,13 +212,13 @@ void DrawMainScreen(int& screen)
     ImGui::EndChild();
 
     ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2, 280));
-    const char* text1 = "You Cart";
+    const char* text1 = "Your Cart";
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text1).x) * 0.5f, 280));
     ImGui::Text("%s", text1);
 
     ImGui::SetCursorPos(ImVec2(150, 300));
 
-    ImGui::BeginChild("Scroll2", ImVec2(io.DisplaySize.x - 300, 100), true);
+    ImGui::BeginChild("yourCart", ImVec2(io.DisplaySize.x - 300, 100), true);
     for (int i = 0; i < items.size(); i++) {
         // c_str() gives pointer to chars inside string, ImGui needs it like this to work
         if (ImGui::Selectable(items[i].c_str(), selected == i)) {
@@ -231,18 +239,20 @@ void DrawMainScreen(int& screen)
     if (selected != -1) {
         ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 440));
         if (ImGui::Button("Go To ", buttonSize)) {
-            screen = 1;
+            sPass2.itemId = selected;
+            cout << "itemId: " << sPass2.itemId << endl;
+            sPass2.currentScreen = 1;
         }
     }
 
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 1 * 0.25f + 10, 510));
     if (ImGui::Button("Save Transaction", buttonSize)) {
-        screen = 1;
+        sPass2.currentScreen = 1;
     }
 
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 510));
     if (ImGui::Button("Cancel Transaction ", buttonSize)) {
-        screen = 1;
+        sPass2.currentScreen  = 1;
     }
 
 
@@ -251,19 +261,28 @@ void DrawMainScreen(int& screen)
 
 
 // SECOND SCREEN
-void DrawSecondScreen(int& screen)
+void DrawSecondScreen(SPass2& sPass2)
 {
+    if (sPass2.itemId  == -1) {
+        cerr << "Item " << sPass2.itemId << " does not exist" << endl;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 buttonSize(300, 120);
+    ImGui::SetWindowFontScale(2.0f);
+    const char* text0 = "Menu";
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text0).x) * 0.5f, 10));
+    ImGui::Text("%s", text0);
+    ImGui::SetWindowFontScale(1.0f);
 
-    float centerX = (io.DisplaySize.x - buttonSize.x) * 0.5f;
-    float centerY = (io.DisplaySize.y - buttonSize.y) * 0.5f;
+    ImGui::SetCursorPos(ImVec2(150, 30));
+    string s = "Item selected: " + std::to_string(sPass2.itemId);
+    ImGui::Text("%s", s.c_str());
 
-    ImGui::SetCursorPos(ImVec2(centerX, centerY));
-    ImGui::Text("Welcome to the SECOND SCREEN!");
+    ImGui::SetCursorPos(ImVec2(150, 50));
+    string s1 = "Quantity in cart: " + std::to_string(6);
+    ImGui::Text("%s", s1.c_str());
 
-    ImGui::SetCursorPos(ImVec2(centerX, centerY + 100));
-
-    if (ImGui::Button("Back", buttonSize))
-        screen = 0;
+    ImGui::SetCursorPos(ImVec2(150, 70));
+    string s2 = "Quantity available: " + std::to_string(7);
+    ImGui::Text("%s", s2.c_str());
 }
