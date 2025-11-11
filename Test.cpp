@@ -18,7 +18,7 @@ struct SPass2 {
 // ------------------------------------------------------------
 // Screen declarations
 // ------------------------------------------------------------
-
+void DrawMainMenu(SPass2& sPass2);
 void DrawCartMenu(SPass2& sPass2);
 void DrawSecondScreen(SPass2& sPass2);
 
@@ -73,7 +73,8 @@ int main()
     // --------------------------------------------------------
     enum Screen {
         SCREEN_MAIN = 0,
-        SCREEN_SECOND = 1
+        SCREEN_CART = 1,
+        SCREEN_SECOND = 2
     };
     SPass2 sPass2;
     sPass2.currentScreen = SCREEN_MAIN;
@@ -116,6 +117,9 @@ int main()
         switch (sPass2.currentScreen)
         {
             case SCREEN_MAIN:
+                DrawMainMenu(sPass2);
+                break;
+            case SCREEN_CART:
                 DrawCartMenu(sPass2);
                 break;
 
@@ -158,6 +162,33 @@ int main()
 
 // TODO: Stop reloading the entire vector every time, update it only when searched.
 // MAIN SCREEN
+void DrawMainMenu(SPass2& sPass2) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::SetWindowFontScale(2.0f);
+    const char* text0 = "Main Menu";
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text0).x) * 0.5f, 10));
+    ImGui::Text("%s", text0);
+    ImGui::SetWindowFontScale(1.0f);
+    ImVec2 buttonSizeLarge(500, 60);
+    ImVec2 buttonSize(240, 60);
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSizeLarge.x) / 2, 50));
+    if (ImGui::Button("Login", buttonSizeLarge)) {
+        sPass2.currentScreen = 1;
+    }
+
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 1 * 0.25f + 10, 130));
+    if (ImGui::Button("Create account", buttonSize)) {
+        sPass2.currentScreen = 1;
+    }
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 130));
+    if (ImGui::Button("Shop as guest", buttonSize)) {
+        sPass2.currentScreen  = 1;
+    }
+}
+
 void DrawCartMenu(SPass2& sPass2)
 {
     static char buffer[128] = ""; // empty C-string initially
@@ -238,26 +269,25 @@ void DrawCartMenu(SPass2& sPass2)
 
     if (selected != -1) {
         ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 440));
-        if (ImGui::Button("Go To ", buttonSize)) {
+        if (ImGui::Button("View selected", buttonSize)) {
             sPass2.itemId = selected;
             cout << "itemId: " << sPass2.itemId << endl;
-            sPass2.currentScreen = 1;
+            sPass2.currentScreen = 2;
         }
     }
 
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 1 * 0.25f + 10, 510));
     if (ImGui::Button("Save Transaction", buttonSize)) {
-        sPass2.currentScreen = 1;
+        sPass2.currentScreen = 0;
     }
 
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSize.x) * 3 * 0.25f - 10, 510));
     if (ImGui::Button("Cancel Transaction ", buttonSize)) {
-        sPass2.currentScreen  = 1;
+        sPass2.currentScreen  = 0;
     }
 
-
-
 }
+
 
 
 // SECOND SCREEN
@@ -269,7 +299,7 @@ void DrawSecondScreen(SPass2& sPass2)
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetWindowFontScale(2.0f);
-    const char* text0 = "Menu";
+    const char* text0 = "Item Menu";
     ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - ImGui::CalcTextSize(text0).x) * 0.5f, 10));
     ImGui::Text("%s", text0);
     ImGui::SetWindowFontScale(1.0f);
@@ -285,4 +315,11 @@ void DrawSecondScreen(SPass2& sPass2)
     ImGui::SetCursorPos(ImVec2(150, 70));
     string s2 = "Quantity available: " + std::to_string(7);
     ImGui::Text("%s", s2.c_str());
+
+    ImVec2 buttonSizeLarge(500, 60);
+
+    ImGui::SetCursorPos(ImVec2((io.DisplaySize.x - buttonSizeLarge.x) / 2, 110));
+    if (ImGui::Button("Go Back", buttonSizeLarge)) {
+        sPass2.currentScreen = 1;
+    }
 }
